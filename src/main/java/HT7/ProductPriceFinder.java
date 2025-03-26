@@ -4,47 +4,60 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Scanner;
 
+/**
+ * A class that manages a collection of products loaded from a CSV file and provides
+ * functionality to search and list products using a Binary Search Tree.
+ */
 public class ProductPriceFinder {
     private BinarySearchTree<Product> bst;
 
+    /**
+     * Constructs a new ProductPriceFinder with an empty Binary Search Tree.
+     */
     public ProductPriceFinder() {
         bst = new BinarySearchTree<>();
     }
 
+    /**
+     * Loads product data from a CSV file into the Binary Search Tree.
+     * The CSV file is expected to have columns in the following order:
+     * CATEGORY, DATE_SCRAPED, SORT_BY, RUN_START_DATE, SUBCATEGORY, SHIPPING_LOCATION,
+     * SKU, COUNTRY, BRAND, PRICE_RETAIL, PRICE_CURRENT, SELLER, PRODUCT_URL, CURRENCY,
+     * BREADCRUMBS, DEPARTMENT, PROMOTION, BESTSELLER_RANK, PRODUCT_NAME, WEBSITE_URL.
+     * Only SKU, PRICE_RETAIL, PRICE_CURRENT, PRODUCT_NAME, and DEPARTMENT are used.
+     *
+     * @param filename the path to the CSV file
+     */
     public void loadCSV(String filename) {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
-            br.readLine(); // Skip header
+            br.readLine();
             
             int lineNumber = 0;
             while ((line = br.readLine()) != null) {
                 lineNumber++;
-                String[] data = line.split(",", -1); // El -1 asegura que se incluyan campos vacíos
-                // Verificamos que la línea tenga suficientes columnas
+                String[] data = line.split(",", -1);
                 if (data.length < 20) {
-                    System.out.println("Línea " + lineNumber + " incompleta: " + line);
+                    System.out.println("Line " + lineNumber + " incomplete: " + line);
                     continue;
                 }
 
-                // Mapeamos las columnas
-                String sku = data[6]; // SKU
-                String priceRetailStr = data[9]; // PRICE_RETAIL
-                String priceCurrentStr = data[10]; // PRICE_CURRENT
-                String productName = data[18]; // PRODUCT_NAME
-                String category = data[15]; // DEPARTMENT
+                String sku = data[6];
+                String priceRetailStr = data[9];
+                String priceCurrentStr = data[10];
+                String productName = data[18];
+                String category = data[15];
 
-                // Validamos que los campos no estén vacíos
                 if (sku.isEmpty() || productName.isEmpty() || category.isEmpty()) {
-                    System.out.println("Línea " + lineNumber + ": SKU, Product_Name o Category vacío. Saltando línea.");
+                    System.out.println("Line " + lineNumber + ": SKU, Product_Name, or Category is empty. Skipping line.");
                     continue;
                 }
 
-                // Parseamos los precios con manejo de valores vacíos
                 double priceRetail;
                 try {
                     priceRetail = priceRetailStr.isEmpty() ? 0.0 : Double.parseDouble(priceRetailStr);
                 } catch (NumberFormatException e) {
-                    System.out.println("Línea " + lineNumber + ": PRICE_RETAIL no válido: " + priceRetailStr + ". Saltando línea.");
+                    System.out.println("Line " + lineNumber + ": Invalid PRICE_RETAIL: " + priceRetailStr + ". Skipping line.");
                     continue;
                 }
 
@@ -52,7 +65,7 @@ public class ProductPriceFinder {
                 try {
                     priceCurrent = priceCurrentStr.isEmpty() ? 0.0 : Double.parseDouble(priceCurrentStr);
                 } catch (NumberFormatException e) {
-                    System.out.println("Línea " + lineNumber + ": PRICE_CURRENT no válido: " + priceCurrentStr + ". Saltando línea.");
+                    System.out.println("Line " + lineNumber + ": Invalid PRICE_CURRENT: " + priceCurrentStr + ". Skipping line.");
                     continue;
                 }
 
@@ -65,6 +78,13 @@ public class ProductPriceFinder {
         }
     }
 
+    /**
+     * Runs the main program, allowing the user to interact with the product data
+     * through a command-line interface. Options include searching by SKU, listing
+     * products in ascending or descending order, and exiting the program.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         ProductPriceFinder finder = new ProductPriceFinder();
         String filePath = "C:\\Users\\carlo\\Downloads\\archive (1)\\home appliance skus lowes.csv";
@@ -72,21 +92,21 @@ public class ProductPriceFinder {
         
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            System.out.println("\n1. Buscar por SKU");
-            System.out.println("2. Listar precios ascendente");
-            System.out.println("3. Listar precios descendente");
-            System.out.println("4. Salir");
+            System.out.println("\n1. Search by SKU");
+            System.out.println("2. List prices in ascending order");
+            System.out.println("3. List prices in descending order");
+            System.out.println("4. Exit");
             
             int option = scanner.nextInt();
             scanner.nextLine();
             
             switch (option) {
                 case 1:
-                    System.out.print("Ingrese SKU: ");
+                    System.out.print("Enter SKU: ");
                     String sku = scanner.nextLine();
                     Product p = finder.bst.find(sku);
                     if (p != null) System.out.println(p);
-                    else System.out.println("Producto no encontrado");
+                    else System.out.println("Product not found");
                     break;
                 case 2:
                     finder.bst.inOrderAscending();
